@@ -30,9 +30,9 @@ class WPAM_Tracking_TrackingLinkBuilder
                 if(isset($aff_landing_page) && !empty($aff_landing_page)){
                     $aff_landing_page = trailingslashit($aff_landing_page);
                     $aff_landing_page = $aff_landing_page.trim($this->creative->slug);
-                    return add_query_arg( array( WPAM_PluginConfig::$wpam_id => $this->affiliate->affiliateId ), $aff_landing_page);
+                    return add_query_arg( array( WPAM_PluginConfig::$ref => $this->affiliate->affiliateId ), $aff_landing_page);
                 }
-		return add_query_arg( array( WPAM_PluginConfig::$wpam_id => $this->affiliate->affiliateId ),
+		return add_query_arg( array( WPAM_PluginConfig::$ref => $this->affiliate->affiliateId ),
 							  home_url( '/'.trim( $this->creative->slug ) ) );
 	}
 

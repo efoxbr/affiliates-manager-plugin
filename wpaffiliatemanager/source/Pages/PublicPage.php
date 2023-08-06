@@ -89,6 +89,9 @@ abstract class WPAM_Pages_PublicPage
 	public static function getPageId(){return;}
 
 	public function doShortcode() {
+		if(!defined('DONOTCACHE')) {
+			define('DONOTCACHE', true);
+		}
 		if ($this->isAvailable(wp_get_current_user())) {
 			return $this->process($_REQUEST);
 		}

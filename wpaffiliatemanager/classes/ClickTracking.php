@@ -37,15 +37,15 @@ class WPAM_Click_Tracking {
             //TODO end
             if(!empty($aff_id)){
                 $cookie_life_time = wpam_get_cookie_life_time();
-                setcookie('wpam_id', $aff_id, $cookie_life_time, "/", COOKIE_DOMAIN);
+                setcookie('ref', $aff_id, $cookie_life_time, "/", COOKIE_DOMAIN);
             }
         }
-        //this will be the new affiliate link. A click will be tracked when wpam_id is present in the URL
-        if (isset($_REQUEST[WPAM_PluginConfig::$wpam_id]) && !empty($_REQUEST[WPAM_PluginConfig::$wpam_id])) {
+        //this will be the new affiliate link. A click will be tracked when ref is present in the URL
+        if (isset($_REQUEST[WPAM_PluginConfig::$ref]) && !empty($_REQUEST[WPAM_PluginConfig::$ref])) {
             global $wpdb;
-            $aff_id = trim(strip_tags($_REQUEST[WPAM_PluginConfig::$wpam_id]));
+            $aff_id = trim(strip_tags($_REQUEST[WPAM_PluginConfig::$ref]));
             $cookie_life_time = wpam_get_cookie_life_time();
-            setcookie('wpam_id', $aff_id, $cookie_life_time, "/", COOKIE_DOMAIN);
+            setcookie('ref', $aff_id, $cookie_life_time, "/", COOKIE_DOMAIN);
             //do not record multiple clicks within 5 seconds
             $current_datetime = date("Y-m-d H:i:s", time());
             $cd_datetime = date("Y-m-d H:i:s", strtotime($current_datetime) - 5);

@@ -60,7 +60,7 @@ class WPAM_PluginConfig
 
 	/***** MISC *****/
 	public static $RefKey = 'wpam_refkey';
-        public static $wpam_id = 'wpam_id';
+        public static $ref = 'ref';
         public static $DefaultCreativeId = 'wpam_default_creative_id';
 
 	/***** short codes *****/

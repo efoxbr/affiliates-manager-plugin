@@ -24,7 +24,7 @@ class WPAM_Commission_Tracking {
             $buyer_email = $args['email'];
         }
         $affiliate = '';
-        if(isset($aff_id) && is_numeric($aff_id)){  //aff_id contains affiliate ID from the new cookie system (wpam_id)
+        if(isset($aff_id) && is_numeric($aff_id)){  //aff_id contains affiliate ID from the new cookie system (ref)
             $query = "SELECT * FROM ".WPAM_AFFILIATES_TBL." WHERE affiliateId = %d";        
             $affiliate = $wpdb->get_row($wpdb->prepare($query, $aff_id));    
         }

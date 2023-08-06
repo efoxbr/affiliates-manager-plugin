@@ -49,9 +49,9 @@ require_once WPAM_BASE_DIRECTORY . "/classes/ClickTracking.php";
 class WPAM_Plugin {
 
     //these are only used as an index and for initial slug naming, users can change it
-    const PAGE_NAME_HOME = 'affiliate-home';
-    const PAGE_NAME_REGISTER = 'affiliate-register';
-    const PAGE_NAME_LOGIN = 'affiliate-login';
+    const PAGE_NAME_HOME = 'affiliate';
+    const PAGE_NAME_REGISTER = 'register';
+    const PAGE_NAME_LOGIN = 'login';
     const EXT_JQUERY_UI_VER = '1.8.13';
 
     private $adminPages = array();
@@ -324,12 +324,12 @@ class WPAM_Plugin {
     }
 
     public function add_custom_input() {
-        $wpam_id_var = '';
-        if (isset($_COOKIE['wpam_id']) && !empty($_COOKIE['wpam_id'])) {
-            $wpam_id = $_COOKIE['wpam_id'];
-            $wpam_id_var = 'wpam_id=' . $wpam_id;
+        $ref_var = '';
+        if (isset($_COOKIE['ref']) && !empty($_COOKIE['ref'])) {
+            $ref = $_COOKIE['ref'];
+            $ref_var = 'ref=' . $ref;
         }
-        $custom_var = apply_filters('wpam_custom_input', $wpam_id_var);
+        $custom_var = apply_filters('wpam_custom_input', $ref_var);
         $custom_input = '<input type="hidden" name="custom" value="' . $custom_var . '" />';
         return $custom_input;
     }
@@ -367,9 +367,9 @@ class WPAM_Plugin {
     }
 
     public function wpspcAddCustomValue($custom_field_val) {
-        if (isset($_COOKIE['wpam_id'])) {
+        if (isset($_COOKIE['ref'])) {
             $name = 'wpam_tracking';
-            $value = $_COOKIE['wpam_id'];
+            $value = $_COOKIE['ref'];
             $new_val = $name . '=' . $value;
             $custom_field_val = $custom_field_val . '&' . $new_val;
             WPAM_Logger::log_debug('Simple WP Cart Integration - Adding custom field value. New value: ' . $custom_field_val);
@@ -402,8 +402,8 @@ class WPAM_Plugin {
         $custom_values = array();
         parse_str($custom_data, $custom_values);
         if (!isset($custom_values['wpam_tracking']) || empty($custom_values['wpam_tracking'])) {
-            if (isset($_COOKIE['wpam_id']) && !empty($_COOKIE['wpam_id'])) {    //useful for onsite option such as smart checkout
-                $custom_values['wpam_tracking'] = $_COOKIE['wpam_id'];
+            if (isset($_COOKIE['ref']) && !empty($_COOKIE['ref'])) {    //useful for onsite option such as smart checkout
+                $custom_values['wpam_tracking'] = $_COOKIE['ref'];
             }
         }
         if (isset($custom_values['wpam_tracking']) && !empty($custom_values['wpam_tracking'])) {
@@ -432,19 +432,19 @@ class WPAM_Plugin {
 
     public function WooCheckoutUpdateOrderMeta($order_id, $posted) {
         $wpam_refkey = "";
-        if (isset($_COOKIE['wpam_id'])) {
-            $wpam_refkey = $_COOKIE['wpam_id'];
+        if (isset($_COOKIE['ref'])) {
+            $wpam_refkey = $_COOKIE['ref'];
         } else if (isset($_COOKIE[WPAM_PluginConfig::$RefKey])) {   //remove this block when we don't expect wpam_refkey cookie anymore
             $wpam_refkey = $_COOKIE[WPAM_PluginConfig::$RefKey];
         }
 
         if (!empty($wpam_refkey)) {//Save the wpam_refkey in the order meta
-            if (is_numeric($wpam_refkey)) {  //wpam_id cookie is found and contains affiliate ID.
+            if (is_numeric($wpam_refkey)) {  //ref cookie is found and contains affiliate ID.
                 $order = wc_get_order($order_id);
-                $order->update_meta_data('_wpam_id', $wpam_refkey);
+                $order->update_meta_data('_ref', $wpam_refkey);
                 $order->save();
-                $wpam_refkey = $order->get_meta('_wpam_id');
-                WPAM_Logger::log_debug("WooCommerce Integration - Saving wpam_id (" . $wpam_refkey . ") with order. Order ID: " . $order_id);
+                $wpam_refkey = $order->get_meta('_ref');
+                WPAM_Logger::log_debug("WooCommerce Integration - Saving ref (" . $wpam_refkey . ") with order. Order ID: " . $order_id);
             } else { //remove this block when we don't expect wpam_refkey cookie anymore 
                 $order = wc_get_order($order_id);
                 $order->update_meta_data('_wpam_refkey', $wpam_refkey);
@@ -459,10 +459,10 @@ class WPAM_Plugin {
                 $aff_id = WPAM_Click_Tracking::get_referrer_id_from_ip_address_by_cookie_duration($user_ip);
                 if (!empty($aff_id)){
                     $order = wc_get_order($order_id);
-                    $order->update_meta_data('_wpam_id', $aff_id);
+                    $order->update_meta_data('_ref', $aff_id);
                     $order->save();
-                    $wpam_refkey = $order->get_meta('_wpam_id');
-                    WPAM_Logger::log_debug("WooCommerce Integration - Saving wpam_id (" . $wpam_refkey . ") with order using a fallback method. Order ID: " . $order_id);
+                    $wpam_refkey = $order->get_meta('_ref');
+                    WPAM_Logger::log_debug("WooCommerce Integration - Saving ref (" . $wpam_refkey . ") with order using a fallback method. Order ID: " . $order_id);
                 }
             }
         }
@@ -516,13 +516,13 @@ class WPAM_Plugin {
         $buyer_email = $order->get_billing_email();
         $currency = $order->get_currency();
         $wpam_refkey = $order->get_meta('_wpam_refkey');
-        $wpam_id = $order->get_meta('_wpam_id');
-        if (!empty($wpam_id)) {
-            $wpam_refkey = $wpam_id;
+        $ref = $order->get_meta('_ref');
+        if (!empty($ref)) {
+            $wpam_refkey = $ref;
         }
         $wpam_refkey = apply_filters('wpam_woo_override_refkey', $wpam_refkey, $order);
         if (empty($wpam_refkey)) {
-            WPAM_Logger::log_debug("WooCommerce Integration - could not get wpam_id/wpam_refkey from cookie. This is not an affiliate sale", 4);
+            WPAM_Logger::log_debug("WooCommerce Integration - could not get ref/wpam_refkey from cookie. This is not an affiliate sale", 4);
             return;
         }
 
@@ -568,8 +568,8 @@ class WPAM_Plugin {
 
     public function edd_store_custom_fields($payment_meta) {
         WPAM_Logger::log_debug('Easy Digital Downlaods Integration - payment_meta filter triggered');
-        if (isset($_COOKIE['wpam_id'])) {
-            $strRefKey = $_COOKIE['wpam_id'];
+        if (isset($_COOKIE['ref'])) {
+            $strRefKey = $_COOKIE['ref'];
             $payment_meta['wpam_refkey'] = $strRefKey;
             WPAM_Logger::log_debug('Easy Digital Downlaods Integration - refkey: ' . $strRefKey);
         } else if (isset($_COOKIE[WPAM_PluginConfig::$RefKey])) {
@@ -598,8 +598,8 @@ class WPAM_Plugin {
             $strRefKey = $payment_meta['wpam_refkey'];
             WPAM_Logger::log_debug('Easy Digital Downlaods Integration - This purchase was referred by an affiliate, refkey: ' . $strRefKey);
         } else { //checking referral cookie since edd_payment_meta filter seems to be triggering after edd_complete_purchase hook as of version 3.0
-            if (isset($_COOKIE['wpam_id'])) {
-                $strRefKey = $_COOKIE['wpam_id'];
+            if (isset($_COOKIE['ref'])) {
+                $strRefKey = $_COOKIE['ref'];
                 WPAM_Logger::log_debug('Easy Digital Downlaods Integration - found refkey: ' . $strRefKey);
             } else if (isset($_COOKIE[WPAM_PluginConfig::$RefKey])) {
                 $strRefKey = $_COOKIE[WPAM_PluginConfig::$RefKey];
